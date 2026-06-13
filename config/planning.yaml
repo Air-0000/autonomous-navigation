@@ -1,0 +1,43 @@
+# 路径规划配置
+planning:
+  # 全局规划（A*）
+  global:
+    grid_resolution: 0.1  # 米
+    diagonal_cost: 1.414  # 对角线移动代价
+
+  # 局部规划（RRT*）
+  local:
+    max_iterations: 500
+    step_size: 0.1
+    goal_bias: 0.1
+    collision_check_resolution: 0.05
+
+# 轨迹预测配置
+trajectory:
+  history_length: 10    # 历史帧数
+  prediction_horizon: 5  # 预测帧数
+  pedestrian_models:
+    - social_lstm
+    - constant_velocity
+  vehicle_models:
+    - constant_velocity
+    - car_following
+
+# 控制参数
+control:
+  max_velocity: 2.0      # 最大速度 m/s
+  max_acceleration: 1.0  # 最大加速度 m/s²
+  robot_radius: 0.3     # 机器人半径 m
+
+# 类脑导航配置
+cognitive:
+  place_cells:
+    field_size: 2.0      # Place Cell感受野大小（米）
+    activation_threshold: 0.5
+    decay_rate: 0.95
+
+  grid_cells:
+    spatial_scale: 0.5   # 网格间距（米）
+    orientation_angles: [0, 60, 120]  # 三个方向
+
+  map_resolution: 0.2    # 认知地图分辨率（米）

@@ -1,0 +1,195 @@
+#VRML_SIM R2025a utf8
+
+WorldInfo {
+  info [
+    "无人系统智能导航仿真环境"
+  ]
+  title "UAV Navigation"
+  basicTimeStep 32
+  FPS 30
+}
+
+Viewpoint {
+  orientation -0.3 0.95 0.1 1.1
+  position 5 8 5
+}
+
+Background {
+  skyColor 0.8 0.8 0.9
+}
+
+DEF GROUND Solid {
+  translation 0 -0.01 0
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.5 0.5 0.5
+        metalness 0
+        roughness 1
+      }
+      geometry Plane {
+        size 10 10
+      }
+    }
+  ]
+  name "ground"
+  boundingObject Plane {
+    size 10 10
+  }
+}
+
+Robot {
+  translation 0 0.5 0
+  children [
+    Camera {
+      width 640
+      height 480
+      near 0.1
+      far 100
+    }
+    Gyro {
+    }
+    GPS {
+    }
+    Compass {
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.2 0.2
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 0.3 0.1 0.3
+      }
+    }
+    Propeller {
+    }
+    Propeller {
+    }
+    Propeller {
+    }
+    Propeller {
+    }
+  ]
+  name "uav"
+  controller "uav_navigation"
+}
+
+Solid {
+  translation 2 0.5 2
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 0.5 1 0.5
+      }
+    }
+  ]
+  name "obstacle1"
+  boundingObject Box {
+    size 0.5 1 0.5
+  }
+}
+
+Solid {
+  translation -2 0.3 1.5
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0
+        metalness 0
+        roughness 1
+      }
+      geometry Sphere {
+        radius 0.3
+      }
+    }
+  ]
+  name "obstacle2"
+  boundingObject Sphere {
+    radius 0.3
+  }
+}
+
+Solid {
+  translation 1 0.4 -2
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 0 1
+        metalness 0
+        roughness 1
+      }
+      geometry Cylinder {
+        height 0.8
+        radius 0.2
+      }
+    }
+  ]
+  name "obstacle3"
+  boundingObject Cylinder {
+    height 0.8
+    radius 0.2
+  }
+}
+
+Solid {
+  translation -1 0.75 3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 1 0
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 1 1.5 1
+      }
+    }
+  ]
+  name "obstacle4"
+  boundingObject Box {
+    size 1 1.5 1
+  }
+}
+
+Solid {
+  translation 0 0.01 0
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0.5
+        metalness 0
+        roughness 1
+      }
+      geometry Cylinder {
+        height 0.02
+        radius 0.3
+      }
+    }
+  ]
+  name "start_point"
+}
+
+Solid {
+  translation 4 0.01 4
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.5 0
+        metalness 0
+        roughness 1
+      }
+      geometry Cylinder {
+        height 0.02
+        radius 0.3
+      }
+    }
+  ]
+  name "goal_point"
+}

@@ -1,0 +1,54 @@
+# Webots仿真环境配置
+webots:
+  robot_name: "uav_navigation"
+  world_file: "worlds/navigation.wbt"
+
+  # 机器人配置
+  robot:
+    type: e-puck  # 可选: e-puck, drone, youbot
+    timestep: 32  # 仿真时间步长（毫秒）
+
+  # 传感器配置
+  sensors:
+    camera:
+      width: 640
+      height: 480
+      fov: 1.5708  # 90度
+      near: 0.1
+      frequency: 30
+
+    gyroscope:
+      frequency: 100
+
+    gps:
+      frequency: 10
+
+    compass:
+      frequency: 100
+
+  # 执行器配置
+  actuators:
+    motor:
+      max_velocity: 10.0
+      acceleration: 10.0
+
+  # 初始位置
+  initial_position:
+    x: 0.0
+    y: 0.5
+    z: 0.0
+
+  # 目标位置
+  goal_position:
+    x: 5.0
+    y: 0.5
+    z: 5.0
+
+  # 障碍物配置
+  obstacles:
+    - type: box
+      position: [1.0, 0.0, 1.0]
+      size: [0.5, 1.0, 0.5]
+    - type: sphere
+      position: [2.0, 0.0, 2.0]
+      radius: 0.3

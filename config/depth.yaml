@@ -1,0 +1,10 @@
+# MiDaS深度估计配置
+model:
+  name: MiDaS_small  # 轻量版，可选 MiDaS / DPT_large
+  input_size: 256    # 输入分辨率
+
+preprocessing:
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std: [0.229, 0.224, 0.225]
+
+device: auto

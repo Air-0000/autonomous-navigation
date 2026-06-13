@@ -1,0 +1,31 @@
+# 无人系统智能导航 - 依赖清单
+
+# === 深度学习框架 ===
+torch>=2.0.0
+torchvision>=0.15.0
+
+# === 感知模块 ===
+ultralytics>=8.0.0       # YOLOv8
+timm>=0.9.0              # MiDaS等模型
+opencv-python>=4.8.0     # 图像处理
+
+# === 类脑模块 ===
+scipy>=1.10.0            # 高斯滤波等
+
+# === Web接口 ===
+fastapi>=0.100.0          # Web框架
+uvicorn>=0.23.0           # ASGI服务器
+websockets>=11.0          # WebSocket支持
+jinja2>=3.1.0             # 模板引擎
+
+# === 数据处理 ===
+numpy>=1.24.0
+pillow>=10.0.0
+pyyaml>=6.0
+
+# === 工具 ===
+tqdm>=4.65.0
+
+# === Webots仿真（可选）===
+# controller             # Webots Python API (需要单独安装Webots)
+# msgpack-rpc-python>=0.4.0

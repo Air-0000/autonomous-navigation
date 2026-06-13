@@ -1,0 +1,29 @@
+# DeepLabV3+语义分割配置
+model:
+  name: deeplabv3_resnet101
+  weights: DeepLabV3_ResNet101_Weights.DEFAULT
+
+classes:
+  # Cityscapes风格类别
+  labels:
+    - road
+    - sidewalk
+    - building
+    - wall
+    - fence
+    - pole
+    - traffic_light
+    - traffic_sign
+    - vegetation
+    - terrain
+    - person
+    - rider
+    - car
+    - truck
+    - bus
+    - train
+    - motorcycle
+    - bicycle
+    - unknown
+
+device: auto

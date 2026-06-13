@@ -1,0 +1,25 @@
+# YOLOv8目标检测配置
+model:
+  name: yolov8n.pt  # nano版本，轻量快速
+  conf_threshold: 0.5
+  iou_threshold: 0.45
+  max_det: 100
+
+classes:
+  # 无人机视角常见的检测类别
+  coco:
+    - person
+    - car
+    - bicycle
+    - motorcycle
+    - bus
+    - truck
+    - traffic light
+    - stop sign
+  # 自定义类别（障碍物）
+  custom:
+    - obstacle
+    - dynamic_obstacle
+    - static_obstacle
+
+device: auto  # 自动选择MPS/CUDA/CPU
