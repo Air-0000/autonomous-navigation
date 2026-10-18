@@ -3,6 +3,7 @@
 基于预训练模型进行实时目标检测
 """
 
+import os
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 import yaml
@@ -12,30 +13,39 @@ class YOLODetector:
     """YOLOv8目标检测器"""
 
     def __init__(self, config_path: Optional[str] = None):
-        # 动态导入避免在没有安装时出错
-        try:
-            from ultralytics import YOLO
-        except ImportError:
-            raise ImportError("请安装 ultralytics: pip install ultralytics")
+        self.mock_mode = False
+        self.model = None
 
-        if config_path:
-            with open(config_path, 'r') as f:
+        if config_path and os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
-            self.model_name = config['model']['name']
-            self.conf_threshold = config['model']['conf_threshold']
-            self.iou_threshold = config['model']['iou_threshold']
+            self.model_name = config.get('model', {}).get('name', 'yolov8n.pt')
+            self.conf_threshold = config.get('model', {}).get('conf_threshold', 0.5)
+            self.iou_threshold = config.get('model', {}).get('iou_threshold', 0.45)
         else:
             self.model_name = 'yolov8n.pt'
             self.conf_threshold = 0.5
             self.iou_threshold = 0.45
 
-        # 加载预训练模型
-        self.model = YOLO(self.model_name)
+        # 尝试加载预训练模型，失败则优雅降级为模拟检测
+        try:
+            from ultralytics import YOLO
+            self.model = YOLO(self.model_name)
+        except Exception as e:
+            print(f"⚠️ YOLOv8未安装或加载失败 ({e})，启用模拟目标检测模式")
+            self.mock_mode = True
 
     def detect(self, image: np.ndarray) -> List[Dict]:
         """
-        检测图像中的目标 - 模拟版
+        检测图像中的目标（真实 YOLO 或模拟模式）
         """
+        if self.model is not None and not self.mock_mode:
+            try:
+                results = self.model(image, conf=self.conf_threshold, iou=self.iou_threshold, verbose=False)
+                return self._parse_results(results)
+            except Exception as e:
+                pass
+
         # 简单模拟检测：在模拟图像上生成检测框
         import time
         h, w = image.shape[:2]

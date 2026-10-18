@@ -47,10 +47,7 @@ class SimpleNavigationSystem:
     """简化版导航系统（用于Web界面）- 优化版"""
 
     def __init__(self):
-        config_dir = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-            'config'
-        )
+        config_dir = os.path.join(project_root, 'config')
 
         # 初始化模块
         print("初始化感知模块...")

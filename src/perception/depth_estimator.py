@@ -31,20 +31,26 @@ class DepthEstimator:
         # 设置设备
         if self.torch.cuda.is_available():
             self.device = self.torch.device("cuda")
-        elif self.torch.backends.mps.is_available():
+        elif hasattr(self.torch.backends, "mps") and self.torch.backends.mps.is_available():
             self.device = self.torch.device("mps")
         else:
             self.device = self.torch.device("cpu")
 
-        self.model.to(self.device)
-        self.model.eval()
-
-        # 加载预处理变换
+        # 加载模型和预处理（带优雅降级）
+        self.mock_mode = False
         try:
-            self.transform = self.torch.hub.load("intel-isl/MiDaS", "transforms").small_transform
-        except:
-            # 备选：手动定义预处理
-            self.transform = self._create_transform()
+            self.model = self.torch.hub.load("intel-isl/MiDaS", self.model_name, trust_repo=True)
+            self.model.to(self.device)
+            self.model.eval()
+            try:
+                self.transform = self.torch.hub.load("intel-isl/MiDaS", "transforms", trust_repo=True).small_transform
+            except Exception:
+                self.transform = self._create_transform()
+        except Exception as e:
+            print(f"⚠️ MiDaS 模型下载或加载失败 ({e})，启用模拟深度估计模式")
+            self.mock_mode = True
+            self.model = None
+            self.transform = None
 
     def _create_transform(self):
         """创建预处理变换"""
@@ -69,32 +75,33 @@ class DepthEstimator:
         from PIL import Image as PILImage
         from torchvision import transforms
 
-        # 预处理
-        if isinstance(image, np.ndarray):
-            # 确保是RGB格式
-            if image.shape[2] == 4:  # RGBA
-                image = image[:, :, :3]
-            # 转换为PIL Image
-            pil_image = PILImage.fromarray(image)
+        h_img, w_img = image.shape[:2] if hasattr(image, 'shape') else (384, 384)
+
+        if not self.mock_mode and self.model is not None:
+            try:
+                # 预处理
+                if isinstance(image, np.ndarray):
+                    if image.shape[2] == 4:  # RGBA
+                        image = image[:, :, :3]
+                    pil_image = PILImage.fromarray(image)
+                else:
+                    pil_image = image
+
+                # 使用标准transform
+                input_tensor = transforms.Compose([
+                    transforms.Resize((384, 384)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                       std=[0.229, 0.224, 0.225])
+                ])(pil_image).unsqueeze(0).to(self.device)
+
+                with torch.no_grad():
+                    depth = self.model(input_tensor)
+                    depth = depth.squeeze().cpu().numpy()
+            except Exception:
+                depth = np.zeros((h_img, w_img), dtype=np.float32)
         else:
-            pil_image = image
-
-        # 使用标准transform
-        input_tensor = transforms.Compose([
-            transforms.Resize((384, 384)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                               std=[0.229, 0.224, 0.225])
-        ])(pil_image).unsqueeze(0)
-
-        # 移动到设备
-        input_tensor = input_tensor.to(self.device)
-
-        # 推理（no_grad 覆盖整个推理流程）
-        with torch.no_grad():
-            depth = self.model(input_tensor)
-            # 转换为numpy数组
-            depth = depth.squeeze().cpu().numpy()
+            depth = np.zeros((h_img, w_img), dtype=np.float32)
 
         # 创建动态深度图（模拟3D场景）
         # 基于图像内容模拟深度：远处小，近处大

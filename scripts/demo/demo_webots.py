@@ -27,12 +27,10 @@ from src.interface.simulator import WebotsSimulator, SimulationRecorder
 class NavigationSystem:
     """完整导航系统"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: Optional[str] = None, headless: bool = False):
         # 配置目录
-        config_dir = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            'config'
-        )
+        repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        config_dir = os.path.join(repo_root, 'config')
 
         # 初始化感知模块
         print("初始化感知模块...")
@@ -71,9 +69,14 @@ class NavigationSystem:
         # 目标位置
         self.goal = (5.0, 5.0)
 
-        # 可视化窗口
+        # 可视化窗口 (支持 headless 运行)
+        self.headless = headless or not os.environ.get("DISPLAY")
         self.window_name = "Navigation Demo"
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        if not self.headless:
+            try:
+                cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+            except Exception:
+                self.headless = True
 
     def run(self, max_steps: int = 500):
         """
@@ -184,10 +187,14 @@ class NavigationSystem:
         self.recorder.finalize(success)
         self._print_summary()
 
-        # 等待按键后关闭
-        print("\n按任意键关闭...")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # 等待按键后关闭 (仅非 headless 模式)
+        if not self.headless:
+            print("\n按任意键关闭...")
+            try:
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+            except Exception:
+                pass
         self.simulator.close()
 
     def visualize(self, image: np.ndarray,
@@ -272,8 +279,12 @@ class NavigationSystem:
                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
 
         # 显示
-        cv2.imshow(self.window_name, main_vis)
-        cv2.waitKey(1)
+        if not self.headless:
+            try:
+                cv2.imshow(self.window_name, main_vis)
+                cv2.waitKey(1)
+            except Exception:
+                self.headless = True
 
     def _print_summary(self):
         """打印统计摘要"""
@@ -298,12 +309,14 @@ def main():
                        help='最大仿真步数')
     parser.add_argument('--config', type=str, default=None,
                        help='配置文件路径')
+    parser.add_argument('--headless', action='store_true',
+                       help='以无界面 headless 模式运行')
 
     args = parser.parse_args()
 
     try:
         # 创建并运行系统
-        system = NavigationSystem(args.config)
+        system = NavigationSystem(args.config, headless=args.headless)
         system.run(max_steps=args.max_steps)
 
     except KeyboardInterrupt:
@@ -313,7 +326,10 @@ def main():
         import traceback
         traceback.print_exc()
     finally:
-        cv2.destroyAllWindows()
+        try:
+            cv2.destroyAllWindows()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
